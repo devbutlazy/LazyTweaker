@@ -1,4 +1,4 @@
-#LazyTweaker — Windows Tweaker by LazyDev
+# LazyTweaker — Windows Tweaker by LazyDev
 
 # TODO:
 - [ ] Beautiful Programm Design
