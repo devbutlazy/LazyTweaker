@@ -9,4 +9,4 @@
 - [ ] Delete UWP Applications (OneDrive, Paint3D, XBOX, Cortana)
 
 ### P.S 
-This is my second project on C++, so please don't beat me up for bad code.
+This is my first project on C++, so please don't beat me up for bad code.
