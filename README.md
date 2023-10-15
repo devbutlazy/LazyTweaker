@@ -1,7 +1,7 @@
 <img src="https://i.postimg.cc/0Q4hLc4z/lazytweaker.png" alt="picture">
 
 # TODO:
-- [ ] Beautiful Programm Design
+- [x] Normal Start Menu Design
 - [x] Toggle Windows Defender (Enable/Disable)
 - [ ] Toggle Telemetry (Enable/Disable)
 - [ ] Toggle Windows Updates (Enable/Disable)
