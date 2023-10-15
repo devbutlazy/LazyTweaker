@@ -35,7 +35,7 @@ int main()
         case 1:
             int arg;
             std::cout << DefenderToggleText << std::endl << std::endl;
-            std::cout << "[1] Disable Windows Defender" << std::endl << "[2] Enable Windows Defender" << std::endl << std::endl;
+            std::cout << "[1] Disable Windows Defender" << std::endl << "[2] Enable Windows Defenderr" << std::endl << std::endl;
             std::cout << ">>> ";
             std::cin >> arg;  
             ToggleWindowsDefender(arg);
