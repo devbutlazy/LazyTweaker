@@ -1,4 +1,4 @@
-### LazyTweaker — a powerful && fast Windows Tweaker, which can help you to optimize your operating system.
+#LazyTweaker — Windows Tweaker by LazyDev
 
 # TODO:
 - [ ] Beautiful Programm Design
