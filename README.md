@@ -1,6 +1,6 @@
-<img src="https://i.postimg.cc/0Q4hLc4z/lazytweaker.png" alt="picture">
-
 # LazyTweaker — Windows Tweaker by LazyDev
+
+<img src="https://i.postimg.cc/0Q4hLc4z/lazytweaker.png" alt="picture">
 
 # TODO:
 - [ ] Beautiful Programm Design
