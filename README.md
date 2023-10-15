@@ -2,7 +2,7 @@
 
 # TODO:
 - [ ] Beautiful Programm Design
-- [ ] Toggle Windows Defender (Enable/Disable)
+- [x] Toggle Windows Defender (Enable/Disable)
 - [ ] Toggle Telemetry (Enable/Disable)
 - [ ] Toggle Windows Updates (Enable/Disable)
 - [ ] Enable Windows 11 Old Context Menu
