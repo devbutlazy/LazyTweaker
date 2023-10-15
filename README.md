@@ -1,6 +1,6 @@
 ### LazyTweaker — a powerful && fast Windows Tweaker, which can help you to optimize your operating system.
 
-#TODO:
+# TODO:
 - [ ] Beautiful Programm Design
 - [ ] Toggle Windows Defender (Enable/Disable)
 - [ ] Toggle Telemetry (Enable/Disable)
@@ -8,5 +8,5 @@
 - [ ] Enable Windows 11 Old Context Menu
 - [ ] Delete UWP Applications (OneDrive, Paint3D, XBOX, Cortana)
 
-#### P.S 
+### P.S 
 This is my second project on C++, so please don't beat me up for bad code.
