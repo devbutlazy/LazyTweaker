@@ -19,12 +19,26 @@ const std::string MainWindowText = R"(
 
 const std::string DefenderToggleText = R"(
 ===============================================================
-                    Toggle Windows Defender
+                Toggle Windows Defender
+===============================================================
+)";
+
+const std::string TelemetryToggleText = R"(
+===============================================================
+                Toggle Windows Telemetry
+===============================================================
+)";
+
+const std::string UpdatesToggleText = R"(
+===============================================================
+                Toggle Windows Updates
 ===============================================================
 )";
 
 
-void ToggleWindowsDefender(const int arg);
+void ToggleWindowsDefender(const char arg);
+void ToggleWindowsTelemetry(const char arg);
+void ToggleWindowsUpdates(const char arg);
 void RetrunToMainMenu();
 
 bool IsRunAsAdmin() {
@@ -81,18 +95,16 @@ int main()
 
         switch (choice) {
             case 1: {
-                int arg;
+                char arg;
                 std::cout << DefenderToggleText << std::endl << std::endl;
                 std::cout << "[1] Disable Windows Defender" << std::endl << "[2] Enable Windows Defender" << std::endl << std::endl;
                 std::cout << ">>> ";
                 std::cin >> arg;
 
                 // Validate the input in a do-while loop
-                while(arg != 1 && arg != 2){
+                while(arg != '1' && arg != '2'){
                     std::cout << "Error || Invalid argument." << std::endl << std::endl;
                     std::cout <<  "[1] Disable Windows Defender" << std::endl << "[2] Enable Windows Defender" << std::endl;
-                    std::cin.clear();
-                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     std::cout << ">>> ";
                     std::cin >> arg;
                 }
@@ -101,10 +113,47 @@ int main()
                 break;
             }
             case 2:
-                // Code for case 2
+                char arg;
+                std::cout << TelemetryToggleText << std::endl << std::endl;
+                std::cout << "[1] Disable Windows Telemetry" << std::endl << "[2] Enable Windows Telemetry" << std::endl << std::endl;
+                std::cout << ">>> ";
+                std::cin >> arg;
+
+                // Validate the input in a do-while loop
+                while(arg != '1' && arg != '2'){
+                    std::cout << "Error || Invalid argument." << std::endl << std::endl;
+                    std::cout <<  "[1] Disable Windows Telemetry" << std::endl << "[2] Enable Windows Telemetry" << std::endl;
+                    std::cout << ">>> ";
+                    std::cin >> arg;
+                }
+
+                ToggleWindowsTelemetry(arg);
+                break;
+            case 3:
+                char option;
+                std::cout << UpdatesToggleText << std::endl << std::endl;
+                std::cout << "[1] Disable Windows Updates" << std::endl << "[2] Enable Windows Updates" << std::endl << std::endl;
+                std::cout << ">>> ";
+                std::cin >> option;
+
+                // Validate the input in a do-while loop
+                while(option != '1' && option != '2'){
+                    std::cout << "Error || Invalid argument." << std::endl << std::endl;
+                    std::cout <<  "[1] Disable Windows Updates" << std::endl << "[2] Enable Windows Updates" << std::endl;
+                    std::cout << ">>> ";
+                    std::cin >> option;
+                }
+
+                ToggleWindowsUpdates(option);
+                break;
+            case 4:
+                //Do code
+                break;
+            case 5:
+                //Do code
                 break;
             default:
-                std::cout << "Invalid choice." << std::endl;
+                std::cout << "Invalid choice. Restart the program!" << std::endl;
         }
             
         system("pause");
@@ -140,7 +189,7 @@ void RetrunToMainMenu()
     }
 }
 
-void ToggleWindowsDefender(const int arg) 
+void ToggleWindowsDefender(const char arg) 
 {
     HKEY key;
     LONG result;
@@ -153,14 +202,14 @@ void ToggleWindowsDefender(const int arg)
         std::cout << "Error || Failed to access Windows Defender registry." << std::endl;
     }
 
-    if (arg == 1) 
+    if (arg == '1') 
     {
         value = 0;
         result = RegSetValueExW(key, L"DisableAntiSpyware", 0, REG_DWORD, reinterpret_cast<const BYTE*>(&value), dataSize);
         if (result == ERROR_SUCCESS) 
         {
             std::cout << "Success || Windows Defender disabled." << std::endl;
-            std::cout << "RESTART REQUIRED!" << std::endl << std::endl;
+            std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
             RetrunToMainMenu();
         } 
         else 
@@ -169,14 +218,14 @@ void ToggleWindowsDefender(const int arg)
             RetrunToMainMenu();
         }
     } 
-    else if (arg == 2) 
+    else if (arg == '2') 
     {
         value = 1;
         result = RegSetValueExW(key, L"DisableAntiSpyware", 0, REG_DWORD, reinterpret_cast<const BYTE*>(&value), dataSize);
         if (result == ERROR_SUCCESS) 
         {
             std::cout << "Success || Windows Defender enabled." << std::endl;
-            std::cout << "RESTART REQUIRED!" << std::endl << std::endl;
+            std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
             RetrunToMainMenu();
         } 
         else 
@@ -187,4 +236,75 @@ void ToggleWindowsDefender(const int arg)
     } 
 
     RegCloseKey(key);
+}
+
+
+void ToggleWindowsTelemetry(const char arg)
+{
+    HKEY hKey;
+    LONG result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, TEXT("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\DataCollection"), 0, KEY_ALL_ACCESS, &hKey);
+
+    if (arg == '1')
+    {
+        if (result == ERROR_SUCCESS)
+        {
+            DWORD value = 0;
+            result = RegSetValueEx(hKey, TEXT("AllowTelemetry"), 0, REG_DWORD, (const BYTE*)&value, sizeof(DWORD));
+            if (result == ERROR_SUCCESS)
+            {
+                std::cout << "Success || Windows Telemetry Disabled." << std::endl;
+                std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
+                RetrunToMainMenu();
+            }
+            else
+            {
+                std::cout << "Error || Failed to disable Windows Telemetry." << std::endl;
+                RetrunToMainMenu();
+            }
+        }
+    }
+    else if (arg == '2')
+    {
+        if (result == ERROR_SUCCESS)
+        {
+            DWORD value = 1;
+            result = RegSetValueEx(hKey, TEXT("AllowTelemetry"), 0, REG_DWORD, (const BYTE*)&value, sizeof(DWORD));
+            if (result == ERROR_SUCCESS)
+            {
+                std::cout << "Success || Windows Telemetry Enabled." << std::endl;
+                std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
+                RetrunToMainMenu();
+            }
+            else
+            {
+                std::cout << "Error || Failed to enable Windows Telemetry." << std::endl;
+                RetrunToMainMenu();
+            }
+        }
+    }
+    RegCloseKey(hKey);
+}
+
+void ToggleWindowsUpdates(const char arg)
+{
+    HKEY hKey;
+    DWORD dwValue = 0;
+    DWORD dwSize = sizeof(DWORD);
+    if (arg == '1')
+    {
+        RegOpenKeyEx(HKEY_LOCAL_MACHINE, TEXT("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update"), 0, KEY_SET_VALUE, &hKey);
+        RegSetValueEx(hKey, TEXT("AUOptions"), 0, REG_DWORD, (BYTE*)&dwValue, dwSize);
+        std::cout << "Success || Windows Updates Disabled." << std::endl;
+        std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
+        RetrunToMainMenu();
+    }
+    else if (arg == '2')
+    {
+        RegOpenKeyEx(HKEY_LOCAL_MACHINE, TEXT("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update"), 0, KEY_ALL_ACCESS, &hKey);
+        RegDeleteValue(hKey, TEXT("AUOptions"));
+        std::cout << "Success || Windows Updates Enabled." << std::endl;
+        std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
+        RetrunToMainMenu();
+    }
+    RegCloseKey(hKey);
 }
