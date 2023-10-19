@@ -1,7 +1,8 @@
 #include <iostream>
 #include <Windows.h>
 #include <string>
-#include <limits>
+#include <vector>
+#include <cstdio>
 
 #define LOGGING
 
@@ -13,7 +14,7 @@ const std::string MainWindowText = R"(
 [2] Toggle Telemetry (Enable/Disable)
 [3] Toggle Windows Updates (Enable/Disable)
 [4] Enable Windows 11 Old Context Menu
-[5] Delete UWP Applications (OneDrive, Paint3D, XBOX, Cortana)
+[5] Delete UWP Applications (OneDrive, Paint3D, XBOX, Cortana, Edge, FeedbackHub)
 ===============================================================
 )";
 
@@ -41,11 +42,21 @@ const std::string ContextMenuToggleText = R"(
 ===============================================================
 )";
 
+const std::string UWPAppsToggleText = R"(
+===============================================================
+                UWP Apps Deletion
+===============================================================
+)";
+
 
 void ToggleWindowsDefender(const char arg);
 void ToggleWindowsTelemetry(const char arg);
 void ToggleWindowsUpdates(const char arg);
 void ToggleWindowsContextMenu(const char arg);
+bool UninstallApp(const std::string& appName, const char arg);
+bool UninstallApp(const std::string& appName, const char arg);
+std::string GetPackageFullName(const std::string& appName);
+
 void RetrunToMainMenu();
 
 bool IsRunAsAdmin() {
@@ -90,6 +101,8 @@ void RestartAsAdmin() {
         std::cout << "Failed to restart with admin privileges (error code: " << error << ")" << std::endl;
     }
 }
+
+
 
 int main()
 {
@@ -179,8 +192,49 @@ int main()
                 break;
             }
             case 5:
-                //Do code
+            {
+                char choice;
+                std::cout << "Which UWP app would you like to uninstall?" << std::endl << std::endl;
+                std::cout << "[1] OneDrive" << std::endl << "[2] Microsoft Edge" << std::endl;
+                std::cout << "[3] Paint3D" << std::endl << "[4] XBOX" << std::endl;
+                std::cout << "[5] Cortana" << std::endl << "[6] FeedbackHub" << std::endl << std::endl;
+                std::cout << ">>> ";
+                std::cin >> choice;
+
+                // Validate the user's choice
+                while (choice < '1' && choice > '5') {
+                    std::cout << "Error: Invalid choice." << std::endl << std::endl;
+                    std::cout << "[1] OneDrive" << std::endl << "[2] Microsoft Edge" << std::endl;
+                    std::cout << "[3] Paint3D" << std::endl << "[4] XBOX" << std::endl;
+                    std::cout << "[5] Cortana" << std::endl << "[6] FeedbackHub" << std::endl << std::endl;
+                    std::cout << ">>> ";
+                    std::cin >> choice;
+                }
+
+                switch(choice)
+                {
+                    case '1':
+                        UninstallApp("Microsoft.OneDrive", choice);
+                        break;
+                    case '2':
+                        UninstallApp("Microsoft.MicrosoftEdge", choice);
+                        break;
+                    case '3':
+                        UninstallApp("Microsoft.MSPaint", choice);
+                        break;
+                    case '4':
+                        UninstallApp("Microsoft.XboxApp", choice);
+                        break;
+                    case '5':
+                        UninstallApp("Microsoft.549981C3F5F10", choice);;
+                        break;
+                    case '6':
+                        UninstallApp("Microsoft.WindowsFeedbackHub", choice);
+                        break;
+                }
+
                 break;
+            }
             default:
                 std::cout << "Invalid choice. Restart the program!" << std::endl;
         }
@@ -385,4 +439,69 @@ void ToggleWindowsContextMenu(const char arg)
         }
     }
     RegCloseKey(hKey);
+}
+
+std::string GetPackageFullName(const std::string& appName) {
+    // Construct the command to get the package full name
+    std::string getPkgFullNameCmd = "powershell -Command \"Get-AppxPackage | Where-Object {$_.NonRemovable -eq $False -and $_.Name -eq '" + appName + "'} | Select -ExpandProperty PackageFullName\"";
+    
+    // Execute the command and read the output
+    char pkgFullName[256];
+    FILE* pipe = _popen(getPkgFullNameCmd.c_str(), "r");
+    
+    // If the output is not empty
+    if (fgets(pkgFullName, sizeof(pkgFullName), pipe) != nullptr) 
+    {
+        _pclose(pipe);
+        size_t len = strlen(pkgFullName);
+        
+        // Remove the newline character from the end of the output
+        if (pkgFullName[len - 1] == '\n') 
+        {
+            pkgFullName[len - 1] = '\0';
+        }
+        
+        // Return the package full name
+        return std::string(pkgFullName);
+    } 
+    else 
+    {
+        _pclose(pipe);
+        
+        // Return an empty string if the output is empty
+        return "";
+    }
+}
+
+bool UninstallApp(const std::string& appName, const char arg) {
+    std::string pkgFullName = GetPackageFullName(appName);
+
+    // Check if the package full name is not empty
+    if (!pkgFullName.empty()) {
+        // Construct the command to remove the app package
+        std::string removePkgCmd = "powershell -Command \"Remove-AppxPackage -Package '" + pkgFullName + "'\"";
+        
+        // Execute the command and get the result
+        int result = system(removePkgCmd.c_str());
+
+        // Check if the removal was successful
+        if (result == 0) 
+        {
+            std::cout << "Success || " << appName << " package removed successfully." << std::endl;
+            RetrunToMainMenu();
+            return true;
+        } 
+        else 
+        {
+            std::cout << "Error || " << "Failed to remove " << appName << " package." << std::endl;
+            RetrunToMainMenu();
+        }
+    } 
+    else 
+    {
+        std::cout << "Error || " << "Failed to retrieve the " << appName << " package full name." << std::endl;
+        std::cout << "Probably, the app is already deleted from your device." << std::endl;
+        RetrunToMainMenu();
+    }
+    return false;
 }
