@@ -6,7 +6,7 @@
 - [x] Toggle Telemetry (Enable/Disable)
 - [x] Toggle Windows Updates (Enable/Disable)
 - [x] Enable Windows 11 Old Context Menu
-- [ ] Delete UWP Applications (OneDrive, Paint3D, XBOX, Cortana)
+- [x] Delete UWP Applications (OneDrive, Paint3D, XBOX, Cortana, Edge, FeedbackHub)
 
 ## If there is a "RESTART REQUIRED" mark after the tweak, restart your PC for applying changes.
 
