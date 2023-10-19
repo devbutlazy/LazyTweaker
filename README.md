@@ -3,10 +3,12 @@
 # TODO:
 - [x] Normal Start Menu Design
 - [x] Toggle Windows Defender (Enable/Disable)
-- [ ] Toggle Telemetry (Enable/Disable)
-- [ ] Toggle Windows Updates (Enable/Disable)
-- [ ] Enable Windows 11 Old Context Menu
+- [x] Toggle Telemetry (Enable/Disable)
+- [x] Toggle Windows Updates (Enable/Disable)
+- [x] Enable Windows 11 Old Context Menu
 - [ ] Delete UWP Applications (OneDrive, Paint3D, XBOX, Cortana)
+
+## If there is a "RESTART REQUIRED" mark after the tweak, restart your PC for applying changes.
 
 ### P.S 
 This is my first project on C++, so please don't beat me up for bad code.

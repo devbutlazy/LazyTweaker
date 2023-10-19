@@ -35,10 +35,17 @@ const std::string UpdatesToggleText = R"(
 ===============================================================
 )";
 
+const std::string ContextMenuToggleText = R"(
+===============================================================
+                Toggle Context Menu
+===============================================================
+)";
+
 
 void ToggleWindowsDefender(const char arg);
 void ToggleWindowsTelemetry(const char arg);
 void ToggleWindowsUpdates(const char arg);
+void ToggleWindowsContextMenu(const char arg);
 void RetrunToMainMenu();
 
 bool IsRunAsAdmin() {
@@ -94,7 +101,8 @@ int main()
         std::cin >> choice;
 
         switch (choice) {
-            case 1: {
+            case 1: 
+            {
                 char arg;
                 std::cout << DefenderToggleText << std::endl << std::endl;
                 std::cout << "[1] Disable Windows Defender" << std::endl << "[2] Enable Windows Defender" << std::endl << std::endl;
@@ -113,6 +121,7 @@ int main()
                 break;
             }
             case 2:
+            {
                 char arg;
                 std::cout << TelemetryToggleText << std::endl << std::endl;
                 std::cout << "[1] Disable Windows Telemetry" << std::endl << "[2] Enable Windows Telemetry" << std::endl << std::endl;
@@ -129,26 +138,46 @@ int main()
 
                 ToggleWindowsTelemetry(arg);
                 break;
+            }
             case 3:
-                char option;
+            {
+                char arg;
                 std::cout << UpdatesToggleText << std::endl << std::endl;
                 std::cout << "[1] Disable Windows Updates" << std::endl << "[2] Enable Windows Updates" << std::endl << std::endl;
                 std::cout << ">>> ";
-                std::cin >> option;
+                std::cin >> arg;
 
                 // Validate the input in a do-while loop
-                while(option != '1' && option != '2'){
+                while(arg != '1' && arg != '2'){
                     std::cout << "Error || Invalid argument." << std::endl << std::endl;
                     std::cout <<  "[1] Disable Windows Updates" << std::endl << "[2] Enable Windows Updates" << std::endl;
                     std::cout << ">>> ";
-                    std::cin >> option;
+                    std::cin >> arg;
                 }
 
-                ToggleWindowsUpdates(option);
+                ToggleWindowsUpdates(arg);
                 break;
+            }
             case 4:
-                //Do code
+            {
+                char arg;
+                std::cout << ContextMenuToggleText << std::endl << std::endl;
+                std::cout <<  "[1] Enable Windows 11 Old Context Menu" << std::endl << "[2] Disable Windows 11 Old Context Menu" << std::endl << std::endl;
+                std::cout << ">>> ";
+                std::cin >> arg;
+
+                // Validate the input in a do-while loop
+                while(arg != '1' && arg != '2'){
+                    std::cout << "Error || Invalid argument." << std::endl << std::endl;
+                    std::cout <<  "[1] Enable Windows 11 Old Context Menu" << std::endl << "[2] Disable Windows 11 Old Context Menu" << std::endl;
+                    std::cout << ">>> ";
+                    std::cin >> arg;
+                }
+
+                ToggleWindowsContextMenu(arg);
+
                 break;
+            }
             case 5:
                 //Do code
                 break;
@@ -305,6 +334,55 @@ void ToggleWindowsUpdates(const char arg)
         std::cout << "Success || Windows Updates Enabled." << std::endl;
         std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
         RetrunToMainMenu();
+    }
+    RegCloseKey(hKey);
+}
+
+void ToggleWindowsContextMenu(const char arg)
+{
+    HKEY hKey;
+    LONG regResult;
+
+
+    if (arg == '1')
+    {
+        LONG lResult = RegOpenKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}"), 0, KEY_READ | KEY_WRITE, &hKey);
+
+        // Set the default value of the registry key.
+        lResult = RegSetValueEx(hKey, NULL, 0, REG_SZ, NULL, 0);
+
+        HKEY hSubKey;
+        lResult = RegCreateKeyEx(hKey, TEXT("InprocServer32"), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_READ | KEY_WRITE, NULL, &hSubKey, NULL);
+
+        lResult = RegSetValueEx(hSubKey, NULL, 0, REG_SZ, NULL, 0);
+
+        RegCloseKey(hSubKey);
+        RegCloseKey(hKey);
+
+        if (lResult == ERROR_SUCCESS) {
+            std::cout << "Success || Windows 11 Old Context Menu Enabled." << std::endl;
+            std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
+            RetrunToMainMenu();
+        }
+        else {
+            RegCloseKey(hSubKey);
+            RegCloseKey(hKey);
+            std::cout << "Error || Failed to enable Windows 11 Old Context Menu." << std::endl;
+            RetrunToMainMenu();
+        }
+    }
+    else if (arg == '2')
+    {
+        regResult = RegDeleteKey(HKEY_CURRENT_USER, TEXT("Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32"));
+
+        // Delete the main key {86ca1aa0-34aa-4e8b-a509-50c905bae2a2}
+        regResult = RegDeleteKey(HKEY_CURRENT_USER, TEXT("Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}"));
+        
+        if (regResult != ERROR_SUCCESS) {
+            std::cout << "Success || Windows 11 Old Context Menu Disabled." << std::endl;
+            std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
+            RetrunToMainMenu();
+        }
     }
     RegCloseKey(hKey);
 }
