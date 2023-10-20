@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <cstdint>
 
 #define LOGGING
 
@@ -57,7 +58,7 @@ bool UninstallApp(const std::string& appName, const char arg);
 bool UninstallApp(const std::string& appName, const char arg);
 std::string GetPackageFullName(const std::string& appName);
 
-void RetrunToMainMenu();
+void ReturnToMainMenu();
 
 bool IsRunAsAdmin() {
     BOOL isAdmin = FALSE;
@@ -249,7 +250,7 @@ int main()
     return 0;
 }
 
-void RetrunToMainMenu()
+void ReturnToMainMenu()
 {
     char option;
 
@@ -278,45 +279,89 @@ void ToggleWindowsDefender(const char arg)
     LONG result;
     DWORD value;
     DWORD dataSize = sizeof(value);
-
-    result = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Policies\\Microsoft\\Windows Defender", 0, KEY_ALL_ACCESS, &key);
-    if (result != ERROR_SUCCESS) 
-    {
-        std::cout << "Error || Failed to access Windows Defender registry." << std::endl;
-    }
-
+    uint32_t payload = 1;
+    
     if (arg == '1') 
     {
-        value = 0;
-        result = RegSetValueExW(key, L"DisableAntiSpyware", 0, REG_DWORD, reinterpret_cast<const BYTE*>(&value), dataSize);
-        if (result == ERROR_SUCCESS) 
+        try
         {
-            std::cout << "Success || Windows Defender disabled." << std::endl;
-            std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
-            RetrunToMainMenu();
-        } 
-        else 
+            if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, TEXT("SOFTWARE\\Policies\\Microsoft\\Windows Defender"), 0, KEY_ALL_ACCESS, &key) == ERROR_SUCCESS)
+            {
+                RegSetValueEx(key, TEXT("DisableAntiSpyware"), 0, REG_DWORD, (LPBYTE)&payload, sizeof(payload));
+
+                HKEY subkey;
+                if (RegCreateKeyEx(key, TEXT("Real-Time Protection"), 0, 0, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, 0, &subkey, 0) == ERROR_SUCCESS)
+                {
+                    RegSetValueEx(subkey, TEXT("DisableRealtimeMonitoring"), 0, REG_DWORD, (LPBYTE)&payload, sizeof(payload));
+                    RegSetValueEx(subkey, TEXT("DisableBehaviorMonitoring"), 0, REG_DWORD, (LPBYTE)&payload, sizeof(payload));
+                    RegSetValueEx(subkey, TEXT("DisableOnAccessProtection"), 0, REG_DWORD, (LPBYTE)&payload, sizeof(payload));
+                    RegSetValueEx(subkey, TEXT("DisableScanOnRealtimeEnable"), 0, REG_DWORD, (LPBYTE)&payload, sizeof(payload));
+                    RegSetValueEx(subkey, TEXT("DisableIOAVProtection"), 0, REG_DWORD, (LPBYTE)&payload, sizeof(payload));
+                    RegCloseKey(subkey);
+
+                    std::cout << "Success || Windows Defender disabled." << std::endl;
+                    std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
+                    ReturnToMainMenu();
+                }
+                else
+                {
+                    std::cout << "Error || Failed to create Real-Time Protection subkey." << std::endl << std::endl;
+                    ReturnToMainMenu();
+                }
+
+                RegCloseKey(key);
+            }
+            else
+            {
+                std::cout << "Error || Failed to open Windows Defender key." << std::endl << std::endl;
+                ReturnToMainMenu();
+            }
+        }
+        catch (const std::exception& e)
         {
             std::cout << "Error || Failed to disable Windows Defender." << std::endl << std::endl;
-            RetrunToMainMenu();
+            ReturnToMainMenu();
         }
     } 
     else if (arg == '2') 
     {
-        value = 1;
-        result = RegSetValueExW(key, L"DisableAntiSpyware", 0, REG_DWORD, reinterpret_cast<const BYTE*>(&value), dataSize);
-        if (result == ERROR_SUCCESS) 
+        try
         {
+            // Open the Windows Defender key
+            if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, TEXT("SOFTWARE\\Policies\\Microsoft\\Windows Defender"), 0, KEY_ALL_ACCESS, &key) != ERROR_SUCCESS) 
+            {
+                std::cout << "Error || Failed to open Windows Defender key." << std::endl;
+                ReturnToMainMenu();
+            }
+
+            // Delete the registry values
+            RegDeleteValue(key, TEXT("DisableAntiSpyware"));
+            
+            HKEY subkey;
+            if (RegOpenKeyEx(key, TEXT("Real-Time Protection"), 0, KEY_ALL_ACCESS, &subkey) == ERROR_SUCCESS) 
+            {
+                RegDeleteValue(subkey, TEXT("DisableRealtimeMonitoring"));
+                RegDeleteValue(subkey, TEXT("DisableBehaviorMonitoring"));
+                RegDeleteValue(subkey, TEXT("DisableOnAccessProtection"));
+                RegDeleteValue(subkey, TEXT("DisableScanOnRealtimeEnable"));
+                RegDeleteValue(subkey, TEXT("DisableIOAVProtection"));
+                RegCloseKey(subkey);
+            }
+
+            // Delete the "Real-Time Protection" subkey
+            RegDeleteKey(key, TEXT("Real-Time Protection"));
+
             std::cout << "Success || Windows Defender enabled." << std::endl;
             std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
-            RetrunToMainMenu();
-        } 
-        else 
+            std::cout << "DEVICE RESTART MAY BE REQUIRED!" << std::endl << std::endl;
+            ReturnToMainMenu();
+        }
+        catch (const std::exception& e)
         {
             std::cout << "Error || Failed to enable Windows Defender." << std::endl << std::endl;
-            RetrunToMainMenu();
+            ReturnToMainMenu();
         }
-    } 
+    }
 
     RegCloseKey(key);
 }
@@ -337,12 +382,12 @@ void ToggleWindowsTelemetry(const char arg)
             {
                 std::cout << "Success || Windows Telemetry Disabled." << std::endl;
                 std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
-                RetrunToMainMenu();
+                ReturnToMainMenu();
             }
             else
             {
                 std::cout << "Error || Failed to disable Windows Telemetry." << std::endl;
-                RetrunToMainMenu();
+                ReturnToMainMenu();
             }
         }
     }
@@ -356,12 +401,12 @@ void ToggleWindowsTelemetry(const char arg)
             {
                 std::cout << "Success || Windows Telemetry Enabled." << std::endl;
                 std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
-                RetrunToMainMenu();
+                ReturnToMainMenu();
             }
             else
             {
                 std::cout << "Error || Failed to enable Windows Telemetry." << std::endl;
-                RetrunToMainMenu();
+                ReturnToMainMenu();
             }
         }
     }
@@ -379,7 +424,7 @@ void ToggleWindowsUpdates(const char arg)
         RegSetValueEx(hKey, TEXT("AUOptions"), 0, REG_DWORD, (BYTE*)&dwValue, dwSize);
         std::cout << "Success || Windows Updates Disabled." << std::endl;
         std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
-        RetrunToMainMenu();
+        ReturnToMainMenu();
     }
     else if (arg == '2')
     {
@@ -387,7 +432,7 @@ void ToggleWindowsUpdates(const char arg)
         RegDeleteValue(hKey, TEXT("AUOptions"));
         std::cout << "Success || Windows Updates Enabled." << std::endl;
         std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
-        RetrunToMainMenu();
+        ReturnToMainMenu();
     }
     RegCloseKey(hKey);
 }
@@ -416,13 +461,13 @@ void ToggleWindowsContextMenu(const char arg)
         if (lResult == ERROR_SUCCESS) {
             std::cout << "Success || Windows 11 Old Context Menu Enabled." << std::endl;
             std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
-            RetrunToMainMenu();
+            ReturnToMainMenu();
         }
         else {
             RegCloseKey(hSubKey);
             RegCloseKey(hKey);
             std::cout << "Error || Failed to enable Windows 11 Old Context Menu." << std::endl;
-            RetrunToMainMenu();
+            ReturnToMainMenu();
         }
     }
     else if (arg == '2')
@@ -435,7 +480,7 @@ void ToggleWindowsContextMenu(const char arg)
         if (regResult != ERROR_SUCCESS) {
             std::cout << "Success || Windows 11 Old Context Menu Disabled." << std::endl;
             std::cout << "DEVICE RESTART REQUIRED!" << std::endl << std::endl;
-            RetrunToMainMenu();
+            ReturnToMainMenu();
         }
     }
     RegCloseKey(hKey);
@@ -488,20 +533,20 @@ bool UninstallApp(const std::string& appName, const char arg) {
         if (result == 0) 
         {
             std::cout << "Success || " << appName << " package removed successfully." << std::endl;
-            RetrunToMainMenu();
+            ReturnToMainMenu();
             return true;
         } 
         else 
         {
             std::cout << "Error || " << "Failed to remove " << appName << " package." << std::endl;
-            RetrunToMainMenu();
+            ReturnToMainMenu();
         }
     } 
     else 
     {
         std::cout << "Error || " << "Failed to retrieve the " << appName << " package full name." << std::endl;
         std::cout << "Probably, the app is already deleted from your device." << std::endl;
-        RetrunToMainMenu();
+        ReturnToMainMenu();
     }
     return false;
 }
