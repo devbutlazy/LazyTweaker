@@ -3,8 +3,8 @@
 # TODO:
 - [x] Normal Start Menu Design
 - [x] Toggle Windows Defender (Enable/Disable)
-- [ ] Remake Toggle Telemetry (Enable/Disable)
-- [ ] Remake Toogle Windows Updates (Enable/Disable)
+- [x] Remake Toggle Telemetry (Enable/Disable)
+- [x] Remake Toogle Windows Updates (Enable/Disable)
 - [x] Enable Windows 11 Old Context Menu
 - [x] Delete UWP Applications (OneDrive, Paint3D, XBOX, Cortana, Edge, FeedbackHub)
 
